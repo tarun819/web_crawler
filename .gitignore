@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# ChromaDB Local Storage
+chroma_data/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment Variables (API keys!)
+.env
+
+# Model Cache (downloaded by sentence-transformers)
+models/
+
+# Logs
+*.log
+
+# Byte-compiled
+*.pyc

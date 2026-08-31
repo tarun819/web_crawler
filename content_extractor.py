@@ -12,7 +12,9 @@ No network calls, no async code — pure HTML-in, structured-data-out.
 import logging
 from typing import Optional
 
+
 import trafilatura
+
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
