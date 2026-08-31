@@ -37,3 +37,6 @@ models/
 
 # Byte-compiled
 *.pyc
+
+# Local documentation / instructions
+IMPLEMENTATION_PLAN.md
