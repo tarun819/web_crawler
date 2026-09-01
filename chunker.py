@@ -14,9 +14,23 @@ Strategy:
 """
 import re
 from typing import List, Dict, Optional
-from transformers import AutoTokenizer
 
 import config
+
+
+class FastTokenizerAdapter:
+    """
+    Adapter around the local ONNX Tokenizer instance providing
+    .encode() and .decode() methods matching AutoTokenizer's interface.
+    """
+    def __init__(self, tokenizer):
+        self._tok = tokenizer
+
+    def encode(self, text: str, add_special_tokens: bool = False) -> list[int]:
+        return self._tok.encode(text).ids
+
+    def decode(self, token_ids: list[int], skip_special_tokens: bool = True) -> str:
+        return self._tok.decode(token_ids)
 
 
 # Lazily loaded tokenizer singleton
@@ -25,15 +39,14 @@ _tokenizer = None
 
 def get_tokenizer():
     """
-    Load the embedding model's tokenizer once and cache it.
-
-    Uses transformers.AutoTokenizer (lightweight — loads only the tokenizer,
-    NOT the full model weights). This gives us exact token counts matching
-    what BGE-small will actually see.
+    Load the tokenizer directly from FastEmbed's local ONNX model instance.
+    Zero network requests to Hugging Face Hub at runtime!
     """
     global _tokenizer
     if _tokenizer is None:
-        _tokenizer = AutoTokenizer.from_pretrained(config.EMBEDDING_MODEL)
+        from embeddings import get_embedding_model
+        model = get_embedding_model()
+        _tokenizer = FastTokenizerAdapter(model.tokenizer)
     return _tokenizer
 
 

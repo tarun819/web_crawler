@@ -8,7 +8,7 @@ Responsibilities:
   updates existing chunks instead of creating duplicates).
 - Ingest crawled + chunked pages into ChromaDB with source metadata.
 
-No network calls — all local compute and local disk storage.
+No network calls - all local compute and local disk storage.
 """
 import hashlib
 import logging
@@ -54,6 +54,11 @@ class FastEmbedWrapper:
             embeddings = list(self._model.embed(texts, batch_size=batch_size))
             return np.array(embeddings)
 
+    @property
+    def tokenizer(self):
+        """Access the local ONNX fast tokenizer bundled with the FastEmbed model."""
+        return self._model.model.tokenizer
+
 
 _model: Optional[FastEmbedWrapper] = None
 _chroma_client: Optional[chromadb.ClientAPI] = None
@@ -76,7 +81,7 @@ def get_chroma_client() -> chromadb.ClientAPI:
     Initialize a persistent ChromaDB client once and cache it.
 
     Data is stored locally on disk at CHROMA_PERSIST_DIR (./chroma_data/).
-    On Render free tier, this resets on cold start — which is fine because
+    On Render free tier, this resets on cold start - which is fine because
     crawling is on-demand and re-crawling re-populates the collection.
     """
     global _chroma_client
@@ -135,7 +140,7 @@ def list_collections() -> list[str]:
 
 
 def delete_collection(domain: str) -> None:
-    """Delete a domain's collection from ChromaDB."""
+    """Delete a domain collection from ChromaDB."""
     client = get_chroma_client()
     collection_name = _domain_to_collection_name(domain)
     try:
@@ -154,7 +159,7 @@ def _make_chunk_id(url: str, chunk_index: int) -> str:
     Generate a deterministic, unique ID for each chunk.
 
     Uses md5(url + "::" + chunk_index) so that:
-    - Re-crawling the same URL produces the same IDs → upsert (update, not duplicate).
+    - Re-crawling the same URL produces the same IDs -> upsert (update, not duplicate).
     - Different URLs or chunk indices always produce different IDs.
     """
     raw = f"{url}::{chunk_index}"
@@ -162,7 +167,7 @@ def _make_chunk_id(url: str, chunk_index: int) -> str:
 
 
 # =====================================================================
-# Ingestion Pipeline: Crawled Pages → Chunks → Embeddings → ChromaDB
+# Ingestion Pipeline: Crawled Pages -> Chunks -> Embeddings -> ChromaDB
 # =====================================================================
 
 def ingest_pages(pages: list[dict]) -> dict:
@@ -231,9 +236,10 @@ def ingest_pages(pages: list[dict]) -> dict:
 
     total_chunks = len(all_ids)
     collection_name = _domain_to_collection_name(domain)
+    total_in_coll = collection.count()
     logger.info(
-        f"Ingestion complete: {len(pages)} pages → {total_chunks} chunks "
-        f"into collection '{collection_name}' (total in collection: {collection.count()})."
+        f"Ingestion complete: {len(pages)} pages -> {total_chunks} chunks "
+        f"into collection {collection_name} (total in collection: {total_in_coll})."
     )
 
     return {
