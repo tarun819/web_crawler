@@ -74,8 +74,8 @@ app.add_middleware(
 
 class CrawlRequest(BaseModel):
     url: str = Field(..., description="Public URL to crawl (must pass SSRF validation)")
-    max_pages: int = Field(default=20, ge=1, le=50, description="Maximum pages to crawl")
-    max_depth: int = Field(default=2, ge=0, le=5, description="Maximum BFS crawl depth")
+    max_pages: int = Field(default=5, ge=1, le=50, description="Maximum pages to crawl")
+    max_depth: int = Field(default=1, ge=0, le=5, description="Maximum BFS crawl depth")
 
 class CrawlResponse(BaseModel):
     domain: str

@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- Crawler Settings ---
-MAX_PAGES = 50
-MAX_DEPTH = 3
+MAX_PAGES = 5
+MAX_DEPTH = 1
 CRAWL_DELAY = 0.75           # Seconds between requests to the same domain
 REQUEST_TIMEOUT = 10.0       # Per-request timeout in seconds
 MAX_RETRIES = 3              # Max retry attempts for 429/5xx status codes

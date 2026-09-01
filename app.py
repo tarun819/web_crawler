@@ -224,11 +224,11 @@ with gr.Blocks(
                 scale=3,
             )
             crawl_pages = gr.Slider(
-                minimum=1, maximum=50, value=10, step=1,
+                minimum=1, maximum=50, value=5, step=1,
                 label="Max Pages", scale=1,
             )
             crawl_depth = gr.Slider(
-                minimum=0, maximum=5, value=2, step=1,
+                minimum=0, maximum=5, value=1, step=1,
                 label="Max Depth", scale=1,
             )
 
