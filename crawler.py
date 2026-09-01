@@ -32,9 +32,9 @@ from content_extractor import extract_text, extract_title, extract_links
 
 logger = logging.getLogger(__name__)
 
-# HTTP headers to identify our crawler respectfully
+# HTTP headers to identify our crawler respectfully (includes repository info to satisfy Wikimedia & web standards)
 HEADERS = {
-    "User-Agent": "DocumentationCrawlerBot/1.0 (+https://github.com/educational-rag-demo)",
+    "User-Agent": "RAGSearchCrawler/1.0 (+https://github.com/tarun819/web_crawler; bot@educational-search.org)",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
     "Accept-Language": "en-US,en;q=0.9",
 }
@@ -66,14 +66,15 @@ async def fetch_robots_txt(domain: str, client: httpx.AsyncClient) -> str:
     return robots_text
 
 
-def is_allowed(url: str, robots_txt: str, user_agent: str = "DocumentationCrawlerBot") -> bool:
+def is_allowed(url: str, robots_txt: str, user_agent: str = "RAGSearchCrawler") -> bool:
     """Check if URL is allowed to be crawled according to robots.txt."""
     if not robots_txt.strip():
         return True
 
+    clean_robots = robots_txt.lstrip("\ufeff")
     parser = urllib.robotparser.RobotFileParser()
     parser.set_url("http://dummy.com/robots.txt")
-    parser.parse(robots_txt.splitlines())
+    parser.parse(clean_robots.splitlines())
     return parser.can_fetch(user_agent, url)
 
 
