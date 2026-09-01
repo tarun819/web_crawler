@@ -46,7 +46,9 @@ async def startup_event():
     """Pre-warm embedding model and ChromaDB on server boot."""
     from embeddings import get_embedding_model, get_chroma_client
     logger.info("Pre-warming embedding model and ChromaDB...")
-    get_embedding_model()
+    model = get_embedding_model()
+    # Force one-time ONNX download & initialization during server boot
+    _ = model.encode("pre-warm initialization text")
     get_chroma_client()
     logger.info("Server startup initialization complete!")
 

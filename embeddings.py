@@ -31,7 +31,10 @@ class FastEmbedWrapper:
     an .encode() method matching SentenceTransformer's interface.
     """
     def __init__(self, model_name: str = config.EMBEDDING_MODEL):
-        self._model = TextEmbedding(model_name=model_name)
+        # threads=1 is CRITICAL for cloud containers (Render/Docker) to prevent
+        # ONNX Runtime from auto-detecting host core count (e.g., 64 cores) and
+        # allocating 64x thread stacks (512MB RAM), which causes OOM crashes.
+        self._model = TextEmbedding(model_name=model_name, threads=1)
 
     def encode(
         self,
