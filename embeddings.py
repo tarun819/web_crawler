@@ -130,6 +130,7 @@ def get_or_create_collection(domain: str) -> chromadb.Collection:
     collection_name = _domain_to_collection_name(domain)
     collection = client.get_or_create_collection(
         name=collection_name,
+        embedding_function=None,
         metadata={"domain": domain, "hnsw:space": "cosine"},
     )
     logger.info(f"Collection '{collection_name}' ready (domain: {domain}, count: {collection.count()}).")
