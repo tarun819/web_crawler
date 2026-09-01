@@ -196,7 +196,6 @@ def handle_query(query: str, domain: str):
 # Build the Gradio UI
 with gr.Blocks(
     title="Documentation RAG Search Engine",
-    theme=gr.themes.Soft(),
 ) as demo:
 
     gr.Markdown(

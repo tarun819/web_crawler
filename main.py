@@ -12,6 +12,7 @@ All endpoints are rate-limited per client IP (sliding window, in-memory).
 import logging
 import time
 
+import gradio as gr
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -22,6 +23,7 @@ from embeddings import ingest_pages, list_collections, get_or_create_collection
 from retrieval import hybrid_search, invalidate_bm25_cache
 from rag import query_rag
 from ratelimit import check_rate_limit
+from app import demo
 
 logging.basicConfig(
     level=logging.INFO,
@@ -74,19 +76,18 @@ class QueryRequest(BaseModel):
 
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    """Apply per-IP sliding-window rate limiting to all endpoints."""
-    # Skip rate limiting for health checks
-    if request.url.path == "/health":
-        return await call_next(request)
+    """Apply per-IP sliding-window rate limiting to API endpoints."""
+    # Apply rate limiting specifically to REST API endpoints
+    api_paths = ("/crawl", "/search", "/query")
+    if any(request.url.path.startswith(p) for p in api_paths):
+        client_ip = request.client.host if request.client else "unknown"
+        is_limited, remaining = check_rate_limit(client_ip)
 
-    client_ip = request.client.host if request.client else "unknown"
-    is_limited, remaining = check_rate_limit(client_ip)
-
-    if is_limited:
-        return JSONResponse(
-            status_code=429,
-            content={"detail": "Rate limit exceeded. Try again in 60 seconds."},
-        )
+        if is_limited:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded. Try again in 60 seconds."},
+            )
 
     response = await call_next(request)
     return response
@@ -218,3 +219,9 @@ async def query_endpoint(request: QueryRequest):
         "chunks_used": result["chunks_used"],
         "latency": result["latency"],
     }
+
+
+# Mount Gradio Web UI onto the FastAPI application root
+# This allows a single server process to serve both the REST API and the interactive UI
+app = gr.mount_gradio_app(app, demo, path="/")
+
