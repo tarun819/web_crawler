@@ -39,7 +39,7 @@ class FastEmbedWrapper:
     def encode(
         self,
         texts: Union[str, List[str]],
-        batch_size: int = 32,
+        batch_size: int = 4,
         show_progress_bar: bool = False,
         **kwargs,
     ) -> np.ndarray:
@@ -222,9 +222,9 @@ def ingest_pages(pages: list[dict]) -> dict:
         return {"domain": domain, "pages_ingested": len(pages), "chunks_stored": 0,
                 "collection_name": _domain_to_collection_name(domain)}
 
-    # Batch embed all chunks at once (much faster than one-by-one)
+    # Batch embed all chunks at once (batch_size=4 prevents OOM on 512MB instances)
     logger.info(f"Embedding {len(all_documents)} chunks for domain '{domain}'...")
-    all_embeddings = model.encode(all_documents, batch_size=32, show_progress_bar=False).tolist()
+    all_embeddings = model.encode(all_documents, batch_size=4, show_progress_bar=False).tolist()
 
     # Upsert into ChromaDB (idempotent: same IDs update, not duplicate)
     # ChromaDB has a batch size limit, so we upsert in batches of 500

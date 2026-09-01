@@ -10,7 +10,7 @@ CRAWL_DELAY = 0.75           # Seconds between requests to the same domain
 REQUEST_TIMEOUT = 10.0       # Per-request timeout in seconds
 MAX_RETRIES = 3              # Max retry attempts for 429/5xx status codes
 MAX_RESPONSE_SIZE = 2 * 1024 * 1024   # 2MB — skip oversized pages before parsing
-CRAWL_SESSION_TIMEOUT = 150           # 2.5 min hard deadline for entire crawl session
+CRAWL_SESSION_TIMEOUT = 80            # 80s hard deadline to prevent Render 100s proxy timeout
 
 # --- Embedding & Storage ---
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
