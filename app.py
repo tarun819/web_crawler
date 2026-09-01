@@ -229,7 +229,7 @@ with gr.Blocks(
                 scale=3,
             )
             crawl_pages = gr.Slider(
-                minimum=1, maximum=50, value=20, step=1,
+                minimum=1, maximum=50, value=10, step=1,
                 label="Max Pages", scale=1,
             )
             crawl_depth = gr.Slider(

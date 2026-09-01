@@ -40,6 +40,15 @@ app = FastAPI(
     version="1.0.0",
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Pre-warm embedding model and ChromaDB on server boot."""
+    from embeddings import get_embedding_model, get_chroma_client
+    logger.info("Pre-warming embedding model and ChromaDB...")
+    get_embedding_model()
+    get_chroma_client()
+    logger.info("Server startup initialization complete!")
+
 # CORS: allow Gradio UI and local development to access the API
 app.add_middleware(
     CORSMiddleware,

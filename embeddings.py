@@ -191,7 +191,7 @@ def ingest_pages(pages: list[dict]) -> dict:
 
     # Batch embed all chunks at once (much faster than one-by-one)
     logger.info(f"Embedding {len(all_documents)} chunks for domain '{domain}'...")
-    all_embeddings = model.encode(all_documents, show_progress_bar=False).tolist()
+    all_embeddings = model.encode(all_documents, batch_size=32, show_progress_bar=False).tolist()
 
     # Upsert into ChromaDB (idempotent: same IDs update, not duplicate)
     # ChromaDB has a batch size limit, so we upsert in batches of 500
