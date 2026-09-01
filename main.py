@@ -141,8 +141,8 @@ async def crawl_endpoint(request: CrawlRequest):
                        "unreachable, or a private/local address.",
             )
 
-        # Phase 3+4: Chunk and ingest into ChromaDB
-        ingest_result = ingest_pages(pages)
+        # Phase 3+4: Chunk and ingest into ChromaDB (offloaded to thread pool)
+        ingest_result = await asyncio.to_thread(ingest_pages, pages)
 
         # Invalidate BM25 cache so next search picks up new chunks
         invalidate_bm25_cache(ingest_result["domain"])

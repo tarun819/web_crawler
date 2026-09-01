@@ -45,17 +45,15 @@ def get_crawled_domains() -> list[str]:
 
 
 # Tab 1: Crawl Handler
-async def handle_crawl(url: str, max_pages: int, max_depth: int, progress=gr.Progress()):
+async def handle_crawl(url: str, max_pages: int, max_depth: int):
     """Crawl a documentation site and ingest into ChromaDB."""
     if not url or not url.strip():
         return "⚠️ Please enter a valid URL.", gr.update(choices=get_crawled_domains())
 
     url = url.strip()
-    progress(0.1, desc="Starting crawl...")
 
     try:
         # Phase 2: Crawl
-        progress(0.2, desc=f"Crawling {url}...")
         pages = await crawl(
             seed_url=url,
             max_pages=int(max_pages),
@@ -72,14 +70,11 @@ async def handle_crawl(url: str, max_pages: int, max_depth: int, progress=gr.Pro
                 gr.update(choices=get_crawled_domains()),
             )
 
-        # Phase 3+4: Chunk + Embed + Store
-        progress(0.6, desc=f"Chunking and embedding {len(pages)} pages...")
-        result = ingest_pages(pages)
+        # Phase 3+4: Chunk + Embed + Store (run in thread pool to prevent event loop blocking)
+        result = await asyncio.to_thread(ingest_pages, pages)
 
         # Invalidate BM25 cache for fresh searches
         invalidate_bm25_cache(result["domain"])
-
-        progress(1.0, desc="Done!")
 
         status = (
             f"✅ **Crawl Complete!**\n\n"
