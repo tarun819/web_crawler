@@ -13,7 +13,7 @@ Reciprocal Rank Fusion (RRF):
 """
 import logging
 import time
-from typing import Optional
+
 
 from rank_bm25 import BM25Okapi
 
@@ -51,7 +51,7 @@ def _build_bm25_index(domain: str) -> dict:
         return _bm25_cache[domain]
 
     # Fetch all documents from ChromaDB
-    all_data = collection.get(include=["documents", "metadatas"])
+    all_data = collection.get(include=["documents", "metadatas"])# id's are always present by default 
     docs = all_data["documents"]
     metadatas = all_data["metadatas"]
     ids = all_data["ids"]
@@ -96,7 +96,7 @@ def vector_search(query: str, domain: str, top_k: int = config.TOP_K_VECTOR) -> 
     if collection.count() == 0:
         return []
 
-    query_embedding = model.encode(query).tolist()
+    query_embedding = model.encode(query).tolist()  # .tolist() is need cause model.encode returns numpy array
 
     results = collection.query(
         query_embeddings=[query_embedding],

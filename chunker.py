@@ -89,7 +89,7 @@ def _split_oversized_paragraph(
                         blocks.append(tokenizer.decode(sub_ids))
                     continue
 
-                if group_tokens + word_tokens > max_tokens and word_group:
+                if group_tokens + word_tokens > max_tokens:
                     blocks.append(" ".join(word_group))
                     word_group = [word]
                     group_tokens = word_tokens
@@ -121,25 +121,6 @@ def chunk_text(
     tokenizer=None,
 ) -> List[Dict]:
     """
-    Paragraph-aware semantic text chunker using exact token counts.
-
-    Uses the embedding model's actual tokenizer to ensure no chunk exceeds
-    the model's context window (512 tokens for BGE-small). Target is ~400
-    tokens per chunk, well within the limit.
-
-    Steps:
-    1. Splits raw clean text on double newlines (\\n\\n) into paragraphs.
-    2. Splits oversized paragraphs along sentence boundaries.
-    3. Accumulates semantic blocks into chunks up to `max_tokens` tokens.
-    4. Merges tiny leftover chunks (< 40 tokens) into previous chunk if room.
-    5. Preserves `overlap_tokens` tokens between neighboring chunks.
-
-    Args:
-        text: Clean extracted text with \\n\\n paragraph separators
-        max_tokens: Target maximum tokens per chunk (default 400)
-        overlap_tokens: Overlap tokens between adjacent chunks (default 100)
-        tokenizer: Optional pre-loaded tokenizer. If None, loads automatically.
-
     Returns:
         List of dicts: [{"text": str, "chunk_index": int, "token_count": int}]
     """

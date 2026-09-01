@@ -182,7 +182,6 @@ def ingest_pages(pages: list[dict]) -> dict:
                 "domain": domain,
                 "chunk_index": chunk["chunk_index"],
                 "token_count": chunk["token_count"],
-                "depth": page["depth"],
             })
 
     if not all_documents:

@@ -198,7 +198,6 @@ async def crawl(
     async with httpx.AsyncClient(
         headers=HEADERS,
         timeout=httpx.Timeout(config.REQUEST_TIMEOUT),
-        limits=httpx.Limits(max_connections=5),
     ) as client:
         # Check robots.txt once upfront
         robots_txt = await fetch_robots_txt(target_domain, client)

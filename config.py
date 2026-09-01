@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- Crawler Settings ---
 MAX_PAGES = 50
@@ -26,5 +29,5 @@ TOP_K_RESULTS = 5
 RRF_K = 60                   # Standard Reciprocal Rank Fusion constant
 
 # --- LLM Settings ---
-GROQ_MODEL = "llama-3.2-3b-preview"
+GROQ_MODEL = "openai/gpt-oss-120b"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
