@@ -41,16 +41,24 @@ app = FastAPI(
     version="1.0.0",
 )
 
+async def _background_warmup():
+    """Download and pre-warm the ONNX embedding model in the background."""
+    try:
+        from embeddings import get_embedding_model, get_chroma_client
+        logger.info("Background pre-warming embedding model and ChromaDB...")
+        model = get_embedding_model()
+        _ = model.encode("pre-warm initialization text")
+        get_chroma_client()
+        logger.info("Background pre-warming complete! Server is fully warm.")
+    except Exception as e:
+        logger.error(f"Error during background warmup: {e}")
+
+
 @app.on_event("startup")
 async def startup_event():
-    """Pre-warm embedding model and ChromaDB on server boot."""
-    from embeddings import get_embedding_model, get_chroma_client
-    logger.info("Pre-warming embedding model and ChromaDB...")
-    model = get_embedding_model()
-    # Force one-time ONNX download & initialization during server boot
-    _ = model.encode("pre-warm initialization text")
-    get_chroma_client()
-    logger.info("Server startup initialization complete!")
+    """Instant server boot: binds HTTP port immediately and warms model in background."""
+    logger.info("Server starting up. Launching background pre-warming task...")
+    asyncio.create_task(_background_warmup())
 
 # CORS: allow Gradio UI and local development to access the API
 app.add_middleware(
