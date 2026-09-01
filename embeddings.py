@@ -13,37 +13,61 @@ No network calls — all local compute and local disk storage.
 import hashlib
 import logging
 import re
-from typing import Optional
+from typing import Optional, Union, List
 
 import chromadb
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
+import numpy as np
 
 import config
 from chunker import chunk_text, get_tokenizer
 
 logger = logging.getLogger(__name__)
 
-# =====================================================================
-# Singletons: Model + ChromaDB Client (loaded once, reused everywhere)
-# =====================================================================
 
-_model: Optional[SentenceTransformer] = None
+class FastEmbedWrapper:
+    """
+    Drop-in wrapper around fastembed.TextEmbedding that provides
+    an .encode() method matching SentenceTransformer's interface.
+    """
+    def __init__(self, model_name: str = config.EMBEDDING_MODEL):
+        self._model = TextEmbedding(model_name=model_name)
+
+    def encode(
+        self,
+        texts: Union[str, List[str]],
+        batch_size: int = 32,
+        show_progress_bar: bool = False,
+        **kwargs,
+    ) -> np.ndarray:
+        """
+        Embed a single text string or a list of text strings using fastembed.
+
+        Returns:
+            - 1D numpy array shape (384,) if texts is a single str (calling .tolist() returns list[float])
+            - 2D numpy array shape (N, 384) if texts is a list[str] (calling .tolist() returns list[list[float]])
+        """
+        if isinstance(texts, str):
+            embeddings = list(self._model.embed([texts], batch_size=1))
+            return embeddings[0]
+        else:
+            embeddings = list(self._model.embed(texts, batch_size=batch_size))
+            return np.array(embeddings)
+
+
+_model: Optional[FastEmbedWrapper] = None
 _chroma_client: Optional[chromadb.ClientAPI] = None
 
 
-def get_embedding_model() -> SentenceTransformer:
+def get_embedding_model() -> FastEmbedWrapper:
     """
-    Load the BGE-small embedding model once and cache it.
-
-    Singleton pattern: the model is ~130MB in memory. Loading it once
-    and reusing the instance avoids repeated disk I/O and RAM allocation
-    on every query or ingestion call.
+    Load the BGE-small ONNX embedding model via FastEmbed once and cache it.
     """
     global _model
     if _model is None:
-        logger.info(f"Loading embedding model: {config.EMBEDDING_MODEL}")
-        _model = SentenceTransformer(config.EMBEDDING_MODEL)
-        logger.info("Embedding model loaded successfully.")
+        logger.info(f"Loading FastEmbed model: {config.EMBEDDING_MODEL}")
+        _model = FastEmbedWrapper(config.EMBEDDING_MODEL)
+        logger.info("FastEmbed model loaded successfully.")
     return _model
 
 
