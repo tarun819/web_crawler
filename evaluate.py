@@ -152,6 +152,41 @@ EVAL_DATASET = [
         "expected_fact": "asyncio.create_task",
         "query_type": "Semantic/Conceptual",
     },
+    # 9. Adversarial: Raw parameter values (BM25 advantage)
+    # Vector search sees "k1=1.5 b=0.75" as generic numbers; BM25 matches the exact tokens.
+    {
+        "query": "k1=1.5 b=0.75 document length penalty",
+        "expected_url": f"https://{BENCHMARK_DOMAIN}/bm25-ranking",
+        "expected_fact": "k1=1.5",
+        "query_type": "Adversarial/Exact-Config",
+    },
+    # 10. Adversarial: Specific class name that appears in a different doc than a similar concept
+    # "HTTPStatusError" lives in httpx-client, but "raise_for_status" is semantically close to
+    # general error handling concepts that might pull in the wrong document via vector search.
+    {
+        "query": "httpx.HTTPStatusError raise_for_status",
+        "expected_url": f"https://{BENCHMARK_DOMAIN}/httpx-client",
+        "expected_fact": "HTTPStatusError",
+        "query_type": "Adversarial/Exact-Symbol",
+    },
+    # 11. Adversarial: Specific method signature with exact parameter names
+    # "tokenUrl='token'" is a very specific string. Vector search might confuse this with
+    # general token/authentication concepts in other documents.
+    {
+        "query": "tokenUrl='token' OAuth2PasswordBearer",
+        "expected_url": f"https://{BENCHMARK_DOMAIN}/fastapi-security",
+        "expected_fact": "tokenUrl",
+        "query_type": "Adversarial/Exact-API",
+    },
+    # 12. Adversarial: Exact config key that could be confused with general vector/distance concepts
+    # "hnsw:space" is a specific ChromaDB config key. Vector search might match any doc about
+    # embeddings or distance, but BM25 will match the exact string.
+    {
+        "query": "hnsw:space cosine metadata configuration",
+        "expected_url": f"https://{BENCHMARK_DOMAIN}/chromadb-vector",
+        "expected_fact": "hnsw:space",
+        "query_type": "Adversarial/Exact-Config",
+    },
 ]
 
 
