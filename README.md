@@ -100,13 +100,11 @@ The retrieval system was evaluated using a small set of manually written documen
 
 The evaluation compares vector-only retrieval against the hybrid BM25 + vector approach using Hit@3 and MRR.
 
-Vector-only:
-Hit@3: 100.0%
-MRR: 1.0000
-
-Hybrid:
-Hit@3: 100.0%
-MRR: 1.0000
+```
+Vector-only      Hit@3: 100.0%    MRR: 1.0000
+BM25-only        Hit@3: 100.0%    MRR: 0.8125
+Hybrid (RRF)     Hit@3: 100.0%    MRR: 1.0000
+```
 
 The evaluation is intentionally small and is mainly used to verify that hybrid retrieval improves or maintains retrieval quality on technical documentation queries.
 
